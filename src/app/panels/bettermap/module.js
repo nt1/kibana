@@ -58,7 +58,8 @@ function (angular, app, _, L, localRequire) {
       size    : 1000,
       spyable : true,
       tooltip : "_id",
-      field   : null
+      field   : null,
+      fieldIsString : false
     };
 
     _.defaults($scope.panel,_d);
@@ -122,6 +123,14 @@ function (angular, app, _, L, localRequire) {
 
         $scope.populate_modal(request);
 
+        var fieldFormatter = _d.fieldIsString ? 
+          function (s) {
+            return s.split(',');
+          } :
+          function (f) {
+            return [f[1], f[0]];
+          };
+
         var results = request.doSearch();
 
         // Populate scope when we have results
@@ -146,7 +155,7 @@ function (angular, app, _, L, localRequire) {
             // Keep only what we need for the set
             $scope.data = $scope.data.slice(0,$scope.panel.size).concat(_.map(results.hits.hits, function(hit) {
               return {
-                coordinates : new L.LatLng(hit.fields[$scope.panel.field][1],hit.fields[$scope.panel.field][0]),
+                coordinates : new L.LatLng(fieldFormatter(hit.fields[$scope.panel.field])),
                 tooltip : hit.fields[$scope.panel.tooltip]
               };
             }));
