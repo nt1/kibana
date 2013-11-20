@@ -59,7 +59,7 @@ function (angular, app, _, L, localRequire) {
       spyable : true,
       tooltip : "_id",
       field   : null,
-      fieldIsString : false
+      fieldIsString : true
     };
 
     _.defaults($scope.panel,_d);
@@ -123,9 +123,11 @@ function (angular, app, _, L, localRequire) {
 
         $scope.populate_modal(request);
 
-        var fieldFormatter = _d.fieldIsString ? 
+        // might make more sense to associate a type with field...
+        var fieldFormatter = (_d.fieldIsString === true) ? 
           function (s) {
-            return s.split(',');
+            var arr = s.split(',');
+            return [arr[0], arr[1]];
           } :
           function (f) {
             return [f[1], f[0]];
@@ -154,8 +156,9 @@ function (angular, app, _, L, localRequire) {
 
             // Keep only what we need for the set
             $scope.data = $scope.data.slice(0,$scope.panel.size).concat(_.map(results.hits.hits, function(hit) {
+              var coords = fieldFormatter(hit.fields[$scope.panel.field]);
               return {
-                coordinates : new L.LatLng(fieldFormatter(hit.fields[$scope.panel.field])),
+                coordinates : new L.LatLng(coords[0], coords[1]),
                 tooltip : hit.fields[$scope.panel.tooltip]
               };
             }));
